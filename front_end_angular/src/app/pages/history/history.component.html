@@ -64,10 +64,10 @@
 <!-- Check IN Dialog -->
 <p-dialog header="Check IN - Borrow Book" [(visible)]="showCheckInDialog" [modal]="true" [style]="{ width: '500px' }" (onShow)="onDialogShow()">
   <div class="dialog-form">
-    <div class="field">
+    <!-- <div class="field">
       <label>Search Book</label>
       <input #bookFilterInput type="text" pInputText [(ngModel)]="bookFilter" placeholder="Filter books by title..." />
-    </div>
+    </div> -->
     <div class="field">
       <label>Select Book</label>
       <p-dropdown [options]="filteredAvailableBooks" [(ngModel)]="selectedBook"

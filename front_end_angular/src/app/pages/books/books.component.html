@@ -7,7 +7,7 @@
     <button pButton icon="pi pi-plus" class="p-button-sm" (click)="openAdd()"
             *ngIf="auth.hasPermission('add_book')" pTooltip="Add Book"></button>
     <span class="p-input-icon-left search-box">
-      <i class="pi pi-search"></i>
+      <i class="pi pi-search" style="margin-top: 1px;"></i>
       <input type="text" pInputText [(ngModel)]="searchText" (ngModelChange)="filterBooks()"
              placeholder="Search books..." />
     </span>

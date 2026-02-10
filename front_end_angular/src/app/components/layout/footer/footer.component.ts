@@ -10,7 +10,7 @@ import { Component } from '@angular/core';
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--color-sidebar-bg);
+      background: var(--color-header-bg);
       color: rgba(255,255,255,0.7);
       font-size: 0.85rem;
       font-weight: 500;
