@@ -20,9 +20,9 @@
    mvn clean install -DskipTests
    ```
 
-3. Run the application:
+3. Run the application (using local config):
    ```
-   mvn spring-boot:run
+   mvn spring-boot:run "-Dspring-boot.run.arguments=--spring.config.location=classpath:/LOCALapplication.properties"
    ```
 
    Or run the JAR directly:
@@ -34,8 +34,15 @@
 
 ## Configuration
 
-- `src/main/resources/application.properties` - Main config (used locally)
-- `src/main/resources/DOCKERapplication.properties` - Docker-specific config
+Two property files exist in `src/main/resources/`:
+
+| File                          | DB Host      | Used By        |
+|-------------------------------|--------------|----------------|
+| `application.properties`      | `mysql_db`   | Docker (active default) |
+| `LOCALapplication.properties` | `localhost`  | Local development       |
+
+- **Local dev**: The VS Code task `valsoft: Java Backend` automatically loads `LOCALapplication.properties` via `--spring.config.location`.
+- **Docker**: Uses `application.properties` which connects to `mysql_db:3306` (the Docker service name).
 - Database connection defaults: `localhost:3306/valsoft_library` with user `root` / password `root`
 
 ## Default Admin Account

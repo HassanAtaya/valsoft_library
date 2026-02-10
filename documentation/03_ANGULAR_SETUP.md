@@ -43,13 +43,21 @@ Output will be in: `dist/valsoft-library/browser/`
 
 ## Configuration
 
-- `src/environments/environment.ts` - Local development settings
-  - Java API URL: `http://localhost:8080/`
-  - Python API URL: `http://localhost:5000/`
-- `src/environments/environment.prod.ts` - Production settings (used by Docker)
+Two environment files exist in `src/environments/`:
+
+| File                    | Java API URL               | Python API URL               | Used By        |
+|-------------------------|----------------------------|------------------------------|----------------|
+| `environment.ts`        | `http://localhost:8080/`   | `http://localhost:5000/`     | Local dev (`ng serve`) |
+| `environment.prod.ts`   | `/`                        | `/pyapi/`                    | Docker / production build |
+
+- **Local dev** (`ng serve`): Calls Java at `localhost:8080` and Python at `localhost:5000` directly.
+- **Production build** (`ng build --configuration production`): Uses relative URLs. Nginx proxies `/api/` to Java and `/pyapi/` to Python inside the Docker network.
+
+> The `angular.json` has `fileReplacements` configured under the `production` configuration to swap `environment.ts` with `environment.prod.ts` during production builds.
 
 ## Notes
 
-- The frontend expects the Java backend running on port `8080` and the Python service on port `5000`
+- For local development, the frontend expects the Java backend running on port `8080` and the Python service on port `5000`
+- For Docker, all traffic goes through Nginx at port `14200` (no direct port access needed)
 - PrimeNG is used for UI components (tables, dialogs, buttons, etc.)
 - All global styles are in `src/styles.scss`

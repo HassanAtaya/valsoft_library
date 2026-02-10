@@ -4,7 +4,7 @@
     {
       "label": "valsoft: Java Backend",
       "type": "shell",
-      "command": "$env:JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21'; mvn spring-boot:run -Dspring-boot.run.arguments='--spring.config.location=classpath:/LOCALapplication.properties'",
+      "command": "$env:JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21'; $env:SPRING_CONFIG_LOCATION = 'classpath:/LOCALapplication.properties'; mvn spring-boot:run",
       "options": {
         "cwd": "${workspaceFolder}/back_end_javaspringboot"
       },
