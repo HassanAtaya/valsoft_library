@@ -5,10 +5,22 @@
 - **Docker 29.2.0** - Download from [docker.com](https://www.docker.com/products/docker-desktop/)
   - Verify: `docker --version`
   - Verify: `docker compose version`
+- **Java 21** and **Maven** (for building the backend JAR)
+- **Node.js 18+** and **Angular CLI** (for building the frontend dist)
+
+## Project Path Configuration
+
+All Docker scripts read the project root path from `PATH.txt` located at the project root:
+
+```
+PATH=C:\Users\Admin\Desktop\valsoft_library\valsoft_library
+```
+
+> If you move the project to a different location, update this file with the new absolute path.
 
 ## What Does the Docker Setup Do?
 
-The `\docker` folder contains everything needed to containerize and run the entire application stack:
+The `\docker` folder contains everything needed to containerize and run the entire application stack.
 
 ### Services
 
@@ -21,70 +33,167 @@ The `\docker` folder contains everything needed to containerize and run the enti
 
 ### Files
 
-- `docker-compose.yml` - Orchestrates all 4 services, builds from source
-- `java/Dockerfile` - Multi-stage build: Maven build then Java runtime
-- `angular/Dockerfile` - Multi-stage build: Node build then Nginx serve
-- `angular/nginx.conf` - Nginx config with API proxy to Java backend
-- `python/Dockerfile` - Python slim image with Flask
-- `mysql/Dockerfile` - MySQL with init script
-- `mysql/init.sql` - Creates the database on first run
-- `run-all.bat` - One-click script to build and start everything
-- `tar-images.bat` - Exports built images as .tar files
+```
+docker/
+  docker-compose.yml          Orchestrates all 4 services (uses ${PROJECT_PATH} from bat scripts)
+  run-all.bat                 One-click: reads PATH.txt, builds and starts everything
+  tar-images.bat              Exports built images as .tar files for offline deployment
+  java/
+    Dockerfile                Copies pre-built JAR (back_end_javaspringboot/target/*.jar)
+  angular/
+    Dockerfile                Copies pre-built dist (front_end_angular/dist/...)
+    nginx.conf                Nginx config: proxies /api/ to Java, /pyapi/ to Python, SPA fallback
+  python/
+    Dockerfile                Python slim image with Flask
+  mysql/
+    Dockerfile                MySQL 8.0 with init script
+    init.sql                  Creates the valsoft_library database on first run
+  TAR_IMAGES/
+    docker-compose.yml        Uses pre-built image tags (no build context)
+    run_project.bat           Loads .tar images and starts all containers
+```
 
-## Building and Running (from source)
+## Application Properties (Local vs Docker)
 
-1. Open a terminal in the `docker` folder:
-   ```
-   cd docker
-   ```
+Two property files exist in `back_end_javaspringboot\src\main\resources\`:
 
-2. Run the batch script:
-   ```
-   run-all.bat
-   ```
+| File                          | DB Host      | Used By        |
+|-------------------------------|--------------|----------------|
+| `application.properties`      | `mysql_db`   | Docker (active) |
+| `LOCALapplication.properties` | `localhost`  | Local dev       |
 
-   Or manually:
-   ```
-   docker compose down -v --remove-orphans
-   docker compose build --no-cache
-   docker compose up -d
-   ```
+- **Docker** uses `application.properties` which connects to `mysql_db:3306` (the Docker service name).
+- **Local dev** via VS Code tasks uses `LOCALapplication.properties` which connects to `localhost:3306`.
 
-3. Access the application:
-   - Frontend: http://localhost:14200
-   - Backend API: http://localhost:18080
-   - Python AI: http://localhost:15000
-   - MySQL: localhost:33306
+> The VS Code task `valsoft: Java Backend` automatically loads `LOCALapplication.properties` via the `--spring.config.location` argument.
 
-## Using Pre-built TAR Images
+## Angular Production Build for Docker
 
-The `\docker\TAR_IMAGES` folder is designed for deploying without building from source:
+The Angular production build (`ng build --configuration production`) uses `environment.prod.ts`:
 
-1. First, build and export images:
-   ```
-   cd docker
-   tar-images.bat
-   ```
+```typescript
+export const environment = {
+  production: true,
+  javaApiUrl: '/',
+  pythonApiUrl: '/pyapi/'
+};
+```
 
-2. Copy the `TAR_IMAGES` folder to the target machine
+- **Java API**: Calls go to `/api/...` (relative), Nginx proxies them to `java_app:8080`
+- **Python AI**: Calls go to `/pyapi/...` (relative), Nginx proxies them to `python_app:5000`
 
-3. On the target machine, run:
-   ```
-   cd TAR_IMAGES
-   run_project.bat
-   ```
+> The `angular.json` has `fileReplacements` configured to swap `environment.ts` with `environment.prod.ts` during production builds.
 
-   This will:
-   - Load all `.tar` image files into Docker
-   - Start all containers using docker-compose
+## Nginx Proxy Configuration
+
+The Angular container runs Nginx (`docker/angular/nginx.conf`) which handles:
+
+| Location   | Proxy Target            | Purpose                       |
+|------------|-------------------------|-------------------------------|
+| `/api/`    | `http://java_app:8080`  | Spring Boot REST API          |
+| `/pyapi/`  | `http://python_app:5000/` | Python AI service (strips /pyapi/ prefix) |
+| `/`        | Static files            | Angular SPA with fallback to index.html   |
+
+## Building and Running
+
+### Step 1: Build the Java JAR
+
+```
+cd back_end_javaspringboot
+mvn clean install -DskipTests
+```
+
+This produces `target\library-0.0.1-SNAPSHOT.jar`.
+
+### Step 2: Build the Angular dist
+
+```
+cd front_end_angular
+npx ng build --configuration production
+```
+
+This produces `dist\valsoft-library\browser\`.
+
+### Step 3: Run Docker
+
+Double-click `docker\run-all.bat` or run from terminal:
+
+```
+cd docker
+run-all.bat
+```
+
+The script will:
+1. Read `PATH.txt` to get the project root (`PROJECT_PATH`)
+2. Stop and remove old containers (`docker compose down -v --remove-orphans`)
+3. Build all 4 Docker images using the pre-built JAR and Angular dist
+4. Start all containers in detached mode
+
+### Step 4: Access the application
+
+| Service  | URL                      |
+|----------|--------------------------|
+| Frontend | http://localhost:14200   |
+| Java API | http://localhost:18080/api/ |
+| MySQL    | localhost:33306 (user: root / pass: root) |
+
+> All API traffic goes through the Angular Nginx proxy at port 14200. You do not need to access Java (18080) or Python (15000) ports directly from the browser.
+
+## Using Pre-built TAR Images (Offline Deployment)
+
+The `\docker\TAR_IMAGES` folder is designed for deploying on a machine without needing the source code.
+
+### Export images
+
+After a successful `run-all.bat` (images exist in Docker), run:
+
+```
+cd docker
+tar-images.bat
+```
+
+This saves 4 `.tar` files into `TAR_IMAGES/`:
+- `docker-mysql_db.tar`
+- `docker-java_app.tar`
+- `docker-angular_app.tar`
+- `docker-python_app.tar`
+
+### Deploy on target machine
+
+1. Copy the entire project folder (or at minimum: `PATH.txt` + `docker\TAR_IMAGES\` folder) to the target machine
+2. Update `PATH.txt` with the new project path on the target machine
+3. Run:
+
+```
+cd docker\TAR_IMAGES
+run_project.bat
+```
+
+This will:
+- Read `PATH.txt` to get the project root
+- Load all 4 `.tar` image files into Docker
+- Start all containers using `TAR_IMAGES\docker-compose.yml` (image-based, no build needed)
 
 ## Stopping
+
+From the `docker` folder (or `TAR_IMAGES` folder if using TAR deployment):
 
 ```
 docker compose down
 ```
 
-To also remove volumes (database data):
+To also remove volumes (deletes all database data):
+
 ```
 docker compose down -v
 ```
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `ERR_CONNECTION_REFUSED` on port 8080 or 5000 | Browser calling localhost ports directly instead of going through Nginx | Use `http://localhost:14200` only. All API calls are proxied by Nginx. |
+| `No static resource .` on `localhost:18080/` | Normal. Java backend only serves `/api/...` endpoints, not root `/`. | Not a bug. Access the app at `http://localhost:14200`. |
+| `PATH variable not found` error in bat script | `PATH.txt` missing or incorrectly formatted | Ensure `PATH.txt` exists at project root with `PATH=<absolute path>` |
+| Java app fails to connect to MySQL | `application.properties` pointing to wrong host | For Docker: use `application.properties` (mysql_db). For local: use `LOCALapplication.properties` (localhost). |
+| Angular shows old/cached behavior | Browser cache or stale Docker image | Clear browser cache. Rebuild Angular (`ng build --configuration production`) and then re-run `run-all.bat`. |
