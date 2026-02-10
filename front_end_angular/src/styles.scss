@@ -196,10 +196,7 @@ input:focus, .p-inputtext:focus, textarea:focus {
   border-color: #e53e3e !important;
 }
 
-/* ======= Row colors for books ======= */
-.row-green { background-color: #f0fff4 !important; }
-.row-orange { background-color: #fffaf0 !important; }
-.row-red { background-color: #fff5f5 !important; }
+/* Row colors for books are applied inline via [style.background-color] in the component */
 
 /* ======= Password mask ======= */
 .password-mask { font-family: monospace; letter-spacing: 2px; }

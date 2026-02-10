@@ -30,20 +30,20 @@
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-book>
-      <tr [ngClass]="getRowClass(book)">
-        <td>
+      <tr>
+        <td [style.background-color]="getRowColor(book)">
           <img *ngIf="book.image" [src]="'data:image/png;base64,' + book.image"
                alt="cover" style="width:40px;height:40px;border-radius:6px;object-fit:cover" />
         </td>
-        <td>{{ book.name }}</td>
-        <td>{{ book.title }}</td>
-        <td>{{ book.type }}</td>
-        <td>{{ book.author }}</td>
-        <td [title]="book.description">{{ truncateDesc(book.description) }}</td>
-        <td>{{ book.inStock }}</td>
-        <td>{{ book.borrowed }}</td>
-        <td>{{ getTotal(book) }}</td>
-        <td>
+        <td [style.background-color]="getRowColor(book)">{{ book.name }}</td>
+        <td [style.background-color]="getRowColor(book)">{{ book.title }}</td>
+        <td [style.background-color]="getRowColor(book)">{{ book.type }}</td>
+        <td [style.background-color]="getRowColor(book)">{{ book.author }}</td>
+        <td [style.background-color]="getRowColor(book)" [title]="book.description">{{ truncateDesc(book.description) }}</td>
+        <td [style.background-color]="getRowColor(book)">{{ book.inStock }}</td>
+        <td [style.background-color]="getRowColor(book)">{{ book.borrowed }}</td>
+        <td [style.background-color]="getRowColor(book)">{{ getTotal(book) }}</td>
+        <td [style.background-color]="getRowColor(book)">
           <div class="action-buttons">
             <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm"
                     (click)="openEdit(book)" *ngIf="auth.hasPermission('edit_book')"></button>

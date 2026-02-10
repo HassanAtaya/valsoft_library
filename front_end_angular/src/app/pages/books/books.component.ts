@@ -112,11 +112,11 @@ export class BooksComponent implements OnInit {
     });
   }
 
-  getRowClass(book: Book): string {
-    if (book.inStock === 0) return 'row-red';
-    if (book.inStock === book.borrowed) return 'row-orange';
-    if (book.inStock > book.borrowed) return 'row-green';
-    return 'row-orange';
+  getRowColor(book: Book): string {
+    if (book.inStock === 0) return '#fed7d7';                    // red
+    if (book.inStock === book.borrowed) return '#feebc8';        // orange
+    if (book.inStock > book.borrowed) return '#c6f6d5';          // green
+    return '#feebc8';
   }
 
   getTotal(book: Book): number {
