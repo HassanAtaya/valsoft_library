@@ -1,6 +1,25 @@
 @echo off
-setlocal
-cd /d "%~dp0"
+setlocal EnableDelayedExpansion
+
+REM ── Read project path from PATH.txt ──
+set "PATH_FILE=%~dp0..\PATH.txt"
+if not exist "%PATH_FILE%" (
+    echo ERROR: PATH.txt not found at "%PATH_FILE%"
+    pause
+    exit /b 1
+)
+for /f "tokens=1,* delims==" %%a in ('type "%PATH_FILE%"') do (
+    if "%%a"=="PATH" set "PROJECT_PATH=%%b"
+)
+if not defined PROJECT_PATH (
+    echo ERROR: PATH variable not found in PATH.txt
+    pause
+    exit /b 1
+)
+echo Project path: %PROJECT_PATH%
+
+REM ── Run docker compose from the docker folder ──
+cd /d "%PROJECT_PATH%\docker"
 
 echo Stopping and removing old containers...
 docker compose down -v --remove-orphans

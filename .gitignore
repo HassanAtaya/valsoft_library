@@ -50,9 +50,9 @@ pip-delete-this-directory.txt
 # ===============================
 # Docker
 # ===============================
-*.tar
-*.tar.gz
-*.tgz
+# *.tar
+# *.tar.gz
+# *.tgz
 
 # ===============================
 # Build / Runtime Artifacts

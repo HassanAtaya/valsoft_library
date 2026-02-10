@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  javaApiUrl: '/api/',
+  javaApiUrl: '/',
   pythonApiUrl: '/pyapi/'
 };
