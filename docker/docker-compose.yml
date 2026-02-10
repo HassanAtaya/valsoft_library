@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: batbotkey
+      MYSQL_DATABASE: valsoft_library
     ports:
       - "33306:3306"
     volumes:
@@ -31,10 +31,10 @@ services:
       - "18080:8080"
     environment:
       MYSQL_HOST: mysql_db
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/batbotkey
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/valsoft_library
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
-      SPRING_FLYWAY_URL: jdbc:mysql://mysql_db:3306/batbotkey
+      SPRING_FLYWAY_URL: jdbc:mysql://mysql_db:3306/valsoft_library
 
   angular_app:
     build:
@@ -43,6 +43,17 @@ services:
     container_name: angular_app
     ports:
       - "14200:4200"
+    depends_on:
+      java_app:
+        condition: service_started
+
+  python_app:
+    build:
+      context: ..
+      dockerfile: docker/python/Dockerfile
+    container_name: python_app
+    ports:
+      - "15000:5000"
     depends_on:
       java_app:
         condition: service_started

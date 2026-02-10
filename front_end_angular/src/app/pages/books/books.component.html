@@ -1,0 +1,108 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2><i class="pi pi-book"></i> Books</h2>
+  </div>
+
+  <div class="toolbar">
+    <button pButton icon="pi pi-plus" class="p-button-sm" (click)="openAdd()"
+            *ngIf="auth.hasPermission('add_book')" pTooltip="Add Book"></button>
+    <span class="p-input-icon-left search-box">
+      <i class="pi pi-search"></i>
+      <input type="text" pInputText [(ngModel)]="searchText" (ngModelChange)="filterBooks()"
+             placeholder="Search books..." />
+    </span>
+  </div>
+
+  <p-table [value]="filteredBooks" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[10,25,50]"
+           styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width:60px">Image</th>
+        <th>Name</th>
+        <th>Title</th>
+        <th>Type</th>
+        <th>Author</th>
+        <th>Description</th>
+        <th>In Stock</th>
+        <th>Borrowed</th>
+        <th>Total</th>
+        <th style="width:130px">Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-book>
+      <tr [ngClass]="getRowClass(book)">
+        <td>
+          <img *ngIf="book.image" [src]="'data:image/png;base64,' + book.image"
+               alt="cover" style="width:40px;height:40px;border-radius:6px;object-fit:cover" />
+        </td>
+        <td>{{ book.name }}</td>
+        <td>{{ book.title }}</td>
+        <td>{{ book.type }}</td>
+        <td>{{ book.author }}</td>
+        <td [title]="book.description">{{ truncateDesc(book.description) }}</td>
+        <td>{{ book.inStock }}</td>
+        <td>{{ book.borrowed }}</td>
+        <td>{{ getTotal(book) }}</td>
+        <td>
+          <div class="action-buttons">
+            <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm"
+                    (click)="openEdit(book)" *ngIf="auth.hasPermission('edit_book')"></button>
+            <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
+                    (click)="confirmDelete(book)" *ngIf="auth.hasPermission('delete_book') && canDelete(book)"></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="10" class="text-center">No books found</td></tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog [header]="editMode ? 'Edit Book' : 'Add Book'" [(visible)]="showDialog"
+          [modal]="true" [style]="{ width: '650px' }" (onShow)="onDialogShow()">
+  <div class="dialog-form">
+    <div class="form-row">
+      <div class="field">
+        <label>Name</label>
+        <input #bookNameInput type="text" pInputText [(ngModel)]="form.name" placeholder="Book name" />
+      </div>
+      <div class="field">
+        <label>Title</label>
+        <input type="text" pInputText [(ngModel)]="form.title" placeholder="Full title" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Type</label>
+        <input type="text" pInputText [(ngModel)]="form.type" placeholder="Genre/Type" />
+      </div>
+      <div class="field">
+        <label>Author</label>
+        <input type="text" pInputText [(ngModel)]="form.author" placeholder="Author name" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>In Stock</label>
+        <p-inputNumber [(ngModel)]="form.inStock" [min]="0" [showButtons]="true"></p-inputNumber>
+      </div>
+      <div class="field">
+        <label>Borrowed</label>
+        <p-inputNumber [(ngModel)]="form.borrowed" [min]="0" [showButtons]="true" [disabled]="editMode"></p-inputNumber>
+      </div>
+    </div>
+    <div class="field">
+      <label>Image (upload)</label>
+      <input type="file" accept="image/*" (change)="onImageUpload($event)" />
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea pInputTextarea [(ngModel)]="form.description" [rows]="4" placeholder="Book description"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="showDialog = false"></button>
+    <button pButton label="Save" icon="pi pi-check" (click)="save()"></button>
+  </ng-template>
+</p-dialog>

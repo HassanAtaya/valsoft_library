@@ -1,16 +1,16 @@
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
 # Maven cache layer
-COPY Technical/java_spring_boot/urlss/pom.xml ./pom.xml
+COPY back_end_javaspringboot/pom.xml ./pom.xml
 RUN mvn -q -DskipTests dependency:go-offline
 
 # Build
-COPY Technical/java_spring_boot/urlss/src ./src
+COPY back_end_javaspringboot/src ./src
 RUN mvn -q -DskipTests package
 
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 

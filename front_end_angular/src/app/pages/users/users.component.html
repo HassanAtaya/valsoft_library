@@ -1,0 +1,74 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2><i class="pi pi-users"></i> Users</h2>
+    <button pButton label="Add User" icon="pi pi-plus" (click)="openAdd()"
+            *ngIf="auth.hasPermission('add_user')"></button>
+  </div>
+
+  <p-table [value]="users" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-user>
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.firstname }}</td>
+        <td>{{ user.lastname }}</td>
+        <td>{{ getRoleName(user) }}</td>
+        <td>
+          <div class="action-buttons" *ngIf="!isAdminUser(user)">
+            <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm"
+                    (click)="openEdit(user)" *ngIf="auth.hasPermission('edit_user')"></button>
+            <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
+                    (click)="confirmDelete(user)" *ngIf="auth.hasPermission('delete_user')"></button>
+          </div>
+          <span *ngIf="isAdminUser(user)" class="admin-badge">Protected</span>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog [header]="editMode ? 'Edit User' : 'Add User'" [(visible)]="showDialog"
+          [modal]="true" [style]="{ width: '550px' }" (onShow)="onDialogShow()">
+  <div class="dialog-form">
+    <div class="field">
+      <label>Username</label>
+      <input #userUsernameInput type="text" pInputText [(ngModel)]="form.username" placeholder="Username" />
+    </div>
+    <div class="field">
+      <label>Password {{ editMode ? '(leave empty to keep)' : '' }}</label>
+      <input type="password" pInputText [(ngModel)]="form.password" placeholder="Password" />
+    </div>
+    <div class="field">
+      <label>First Name</label>
+      <input type="text" pInputText [(ngModel)]="form.firstname" placeholder="First name" />
+    </div>
+    <div class="field">
+      <label>Last Name</label>
+      <input type="text" pInputText [(ngModel)]="form.lastname" placeholder="Last name" />
+    </div>
+    <div class="field">
+      <label>Role</label>
+      <p-dropdown [options]="roles" [(ngModel)]="form.roleId"
+                  optionLabel="name" optionValue="id" placeholder="Select role"
+                  [style]="{ width: '100%' }"></p-dropdown>
+    </div>
+    <div class="field">
+      <label>Preferences</label>
+      <textarea pInputTextarea [(ngModel)]="form.preferences" [rows]="3" placeholder="Preferences"></textarea>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="showDialog = false"></button>
+    <button pButton label="Save" icon="pi pi-check" (click)="save()"></button>
+  </ng-template>
+</p-dialog>

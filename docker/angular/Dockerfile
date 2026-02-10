@@ -1,22 +1,22 @@
-FROM node:20-alpine AS build
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
 # Install deps first (better build caching)
-COPY Technical/angular/urls/package.json Technical/angular/urls/package-lock.json ./
-RUN npm ci
+COPY front_end_angular/package.json front_end_angular/package-lock.json* ./
+RUN npm ci || npm install
 
 # Copy source
-COPY Technical/angular/urls/ ./
+COPY front_end_angular/ ./
 
-# Build (outputs dist/urls/browser by default)
+# Build (outputs dist/valsoft-library/browser by default)
 RUN npm run build
 
 FROM nginx:alpine
 
 WORKDIR /usr/share/nginx/html
 
-COPY --from=build /app/dist/urls/browser/ ./
+COPY --from=build /app/dist/valsoft-library/browser/ ./
 COPY docker/angular/nginx.conf /etc/nginx/conf.d/default.conf
 
 CMD ["nginx", "-g", "daemon off;"]

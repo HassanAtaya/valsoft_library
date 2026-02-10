@@ -1,0 +1,10 @@
+.page-container {
+  h2 {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-primary);
+  }
+}
+.text-center { text-align: center; padding: 2rem !important; color: var(--color-on-surface-muted); }
