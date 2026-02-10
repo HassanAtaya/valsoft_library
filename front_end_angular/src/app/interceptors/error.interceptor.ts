@@ -24,7 +24,17 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
         switch (error.status) {
           case 400: errorMessage = 'Invalid Request'; errorDetail = extract(); break;
-          case 401: errorMessage = 'Unauthorized'; errorDetail = 'Please login to continue'; break;
+          case 401:
+            // Suppress generic 401 popup when we are already on/login page
+            // or during login request itself (normal flow).
+            const isLoginRequest = req.url.includes('/api/auth/login');
+            const isOnLoginPage = typeof location !== 'undefined' && location.pathname.startsWith('/login');
+            if (isLoginRequest || isOnLoginPage) {
+              return throwError(() => error);
+            }
+            errorMessage = 'Unauthorized';
+            errorDetail = 'Please login to continue';
+            break;
           case 403: errorMessage = 'Forbidden'; errorDetail = 'You do not have permission'; break;
           case 404: errorMessage = 'Not Found'; errorDetail = extract(); break;
           case 409: errorMessage = 'Conflict'; errorDetail = extract(); break;

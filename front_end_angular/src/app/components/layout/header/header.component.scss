@@ -52,3 +52,22 @@
     background: rgba(255,255,255,0.15) !important;
   }
 }
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 0.75rem;
+  }
+
+  .header-title {
+    font-size: 1rem;
+  }
+
+  .header-username {
+    display: none;
+  }
+
+  .header-logo {
+    height: 30px;
+  }
+}
+

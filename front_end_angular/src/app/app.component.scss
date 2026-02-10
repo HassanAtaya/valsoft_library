@@ -42,3 +42,14 @@
   background: var(--color-background);
   min-height: calc(100vh - 60px - 40px); // minus header and footer
 }
+
+@media (max-width: 768px) {
+  .app-body {
+    margin-left: 60px; // keep content clear of fixed sidebar
+  }
+
+  .app-content {
+    padding: 0.75rem;
+  }
+}
+
