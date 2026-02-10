@@ -1,0 +1,60 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "valsoft: Java Backend",
+      "type": "shell",
+      "command": "$env:JAVA_HOME = 'C:\\Program Files\\Java\\jdk-21'; mvn spring-boot:run -Dspring-boot.run.arguments='--spring.config.location=classpath:/LOCALapplication.properties'",
+      "options": {
+        "cwd": "${workspaceFolder}/back_end_javaspringboot"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "valsoft: Angular Frontend",
+      "type": "shell",
+      "command": "npx ng serve --port 4200",
+      "options": {
+        "cwd": "${workspaceFolder}/front_end_angular"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "valsoft: Python AI",
+      "type": "shell",
+      "command": "python main.py",
+      "options": {
+        "cwd": "${workspaceFolder}/ai_python"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "valsoft: [Ctrl+Alt+9] Run All Apps",
+      "dependsOn": [
+        "valsoft: Java Backend",
+        "valsoft: Angular Frontend",
+        "valsoft: Python AI"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    }
+  ]
+}
